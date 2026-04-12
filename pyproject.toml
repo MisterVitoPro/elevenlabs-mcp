@@ -1,0 +1,16 @@
+[project]
+name = "elevenlabs-mcp"
+version = "0.1.0"
+description = "MCP server for ElevenLabs text-to-speech and sound effects"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp[cli]>=1.2.0",
+    "elevenlabs>=1.0.0",
+]
+
+[project.scripts]
+elevenlabs-mcp = "elevenlabs_mcp.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
