@@ -69,5 +69,28 @@ def text_to_speech(
     return str(path.resolve())
 
 
+@mcp.tool
+def sound_effect(
+    prompt: str,
+    duration: float | None = None,
+    output_path: str | None = None,
+) -> str:
+    """Generate a sound effect from a text description using ElevenLabs.
+
+    Args:
+        prompt: Text description of the desired sound effect.
+        duration: Optional duration in seconds (0.5-30). Auto-determined if omitted.
+        output_path: Optional file path to save audio. Defaults to auto-generated path.
+    """
+    client = get_client()
+    kwargs = {"text": prompt}
+    if duration is not None:
+        kwargs["duration_seconds"] = duration
+    audio = client.text_to_sound_effects.convert(**kwargs)
+    path = resolve_output_path(output_path, "sfx", "sfx")
+    save_audio(audio, path)
+    return str(path.resolve())
+
+
 def main():
     mcp.run()
