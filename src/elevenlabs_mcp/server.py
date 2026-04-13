@@ -233,5 +233,22 @@ def audio_isolation(
     return str(path.resolve())
 
 
+@mcp.tool
+def speech_to_text(audio_path: str) -> str:
+    """Transcribe an audio file to text.
+
+    Args:
+        audio_path: Path to the input audio file.
+    """
+    input_path = validate_audio_path(audio_path)
+    client = get_client()
+    with open(input_path, "rb") as f:
+        response = client.speech_to_text.convert(
+            file=f,
+            model_id="scribe_v2",
+        )
+    return response.text
+
+
 def main():
     mcp.run()
