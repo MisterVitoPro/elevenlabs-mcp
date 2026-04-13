@@ -271,5 +271,24 @@ def list_models() -> str:
     return json.dumps(data, indent=2)
 
 
+@mcp.tool
+def get_usage() -> str:
+    """Get current ElevenLabs API usage and quota information.
+
+    Returns JSON with character usage, limits, and reset time.
+    """
+    client = get_client()
+    user = client.user.get()
+    sub = user.subscription
+    data = {
+        "tier": sub.tier,
+        "character_count": sub.character_count,
+        "character_limit": sub.character_limit,
+        "characters_remaining": sub.character_limit - sub.character_count,
+        "next_reset_unix": sub.next_character_count_reset_unix,
+    }
+    return json.dumps(data, indent=2)
+
+
 def main():
     mcp.run()
