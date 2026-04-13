@@ -53,3 +53,20 @@ def test_save_audio_creates_directory_and_file():
         save_audio(audio_chunks, output_path)
         assert output_path.exists()
         assert output_path.read_bytes() == b"fakeaudiodata"
+
+
+def test_validate_audio_path_valid_file():
+    from elevenlabs_mcp.server import validate_audio_path
+    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
+        f.write(b"fake audio")
+        f.flush()
+        result = validate_audio_path(f.name)
+        assert result == Path(f.name)
+    os.unlink(f.name)
+
+
+def test_validate_audio_path_missing_file():
+    import pytest
+    from elevenlabs_mcp.server import validate_audio_path
+    with pytest.raises(ValueError, match="Audio file not found"):
+        validate_audio_path("/nonexistent/audio.mp3")
