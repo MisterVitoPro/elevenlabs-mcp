@@ -154,3 +154,39 @@ def test_speech_to_speech():
         assert Path(output_file).read_bytes() == b"convertedaudio"
         mock_client.speech_to_speech.convert.assert_called_once()
     os.unlink(input_path)
+
+
+def test_text_to_dialogue():
+    from elevenlabs_mcp.server import text_to_dialogue
+
+    mock_client = MagicMock()
+    mock_voice_alice = MagicMock()
+    mock_voice_alice.voice_id = "alice_id"
+    mock_voice_alice.name = "Alice"
+    mock_voice_bob = MagicMock()
+    mock_voice_bob.voice_id = "bob_id"
+    mock_voice_bob.name = "Bob"
+    mock_client.voices.get_all.return_value = MagicMock(
+        voices=[mock_voice_alice, mock_voice_bob]
+    )
+    mock_client.text_to_dialogue.convert.return_value = iter([b"dialogue", b"audio"])
+
+    dialogue = [
+        {"voice": "Alice", "text": "Hello there!"},
+        {"voice": "Bob", "text": "Hi Alice!"},
+    ]
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_file = os.path.join(tmpdir, "dialogue.mp3")
+        with patch("elevenlabs_mcp.server.get_client", return_value=mock_client):
+            result = text_to_dialogue(dialogue=dialogue, output_path=output_file)
+
+        assert result == str(Path(output_file).resolve())
+        assert Path(output_file).read_bytes() == b"dialogueaudio"
+        call_kwargs = mock_client.text_to_dialogue.convert.call_args
+        inputs = call_kwargs.kwargs["inputs"]
+        assert len(inputs) == 2
+        assert inputs[0].text == "Hello there!"
+        assert inputs[0].voice_id == "alice_id"
+        assert inputs[1].text == "Hi Alice!"
+        assert inputs[1].voice_id == "bob_id"

@@ -39,6 +39,7 @@ def save_audio(audio_chunks, output_path: Path) -> None:
 
 
 from elevenlabs.client import ElevenLabs
+from elevenlabs import DialogueInput
 
 
 def get_client() -> ElevenLabs:
@@ -186,6 +187,28 @@ def speech_to_speech(
             model_id=model,
         )
     path = resolve_output_path(output_path, voice, "sts")
+    save_audio(audio, path)
+    return str(path.resolve())
+
+
+@mcp.tool
+def text_to_dialogue(
+    dialogue: list[dict],
+    output_path: str | None = None,
+) -> str:
+    """Generate multi-speaker dialogue audio from a script.
+
+    Args:
+        dialogue: List of dialogue turns. Each turn is a dict with "voice" (name or ID) and "text".
+        output_path: Optional file path to save audio. Defaults to auto-generated path.
+    """
+    client = get_client()
+    inputs = []
+    for turn in dialogue:
+        voice_id = resolve_voice_id(client, turn["voice"])
+        inputs.append(DialogueInput(text=turn["text"], voice_id=voice_id))
+    audio = client.text_to_dialogue.convert(inputs=inputs)
+    path = resolve_output_path(output_path, "dialogue", "dialogue")
     save_audio(audio, path)
     return str(path.resolve())
 
