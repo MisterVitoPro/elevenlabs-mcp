@@ -216,3 +216,26 @@ def test_audio_isolation():
         mock_client.audio_isolation.convert.assert_called_once()
 
     os.unlink(input_path)
+
+
+def test_speech_to_text():
+    from elevenlabs_mcp.server import speech_to_text
+
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    mock_response.text = "Hello, this is a transcription test."
+    mock_client.speech_to_text.convert.return_value = mock_response
+
+    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as input_f:
+        input_f.write(b"fake audio data")
+        input_f.flush()
+        input_path = input_f.name
+
+    with patch("elevenlabs_mcp.server.get_client", return_value=mock_client):
+        result = speech_to_text(audio_path=input_path)
+
+    assert result == "Hello, this is a transcription test."
+    mock_client.speech_to_text.convert.assert_called_once()
+    call_kwargs = mock_client.speech_to_text.convert.call_args.kwargs
+    assert call_kwargs["model_id"] == "scribe_v2"
+    os.unlink(input_path)
