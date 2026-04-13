@@ -250,5 +250,26 @@ def speech_to_text(audio_path: str) -> str:
     return response.text
 
 
+@mcp.tool
+def list_models() -> str:
+    """List all available ElevenLabs models.
+
+    Returns a JSON array of models with their ID, name, description, and capabilities.
+    """
+    client = get_client()
+    models = client.models.list()
+    data = [
+        {
+            "model_id": m.model_id,
+            "name": m.name,
+            "description": m.description,
+            "can_do_text_to_speech": m.can_do_text_to_speech,
+            "can_do_voice_conversion": m.can_do_voice_conversion,
+        }
+        for m in models
+    ]
+    return json.dumps(data, indent=2)
+
+
 def main():
     mcp.run()

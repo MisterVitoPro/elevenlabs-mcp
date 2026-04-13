@@ -239,3 +239,27 @@ def test_speech_to_text():
     call_kwargs = mock_client.speech_to_text.convert.call_args.kwargs
     assert call_kwargs["model_id"] == "scribe_v2"
     os.unlink(input_path)
+
+
+def test_list_models():
+    from elevenlabs_mcp.server import list_models
+
+    mock_client = MagicMock()
+    mock_model = MagicMock()
+    mock_model.model_id = "eleven_multilingual_v2"
+    mock_model.name = "Multilingual v2"
+    mock_model.description = "Multi-language model"
+    mock_model.can_do_text_to_speech = True
+    mock_model.can_do_voice_conversion = True
+    mock_client.models.list.return_value = [mock_model]
+
+    with patch("elevenlabs_mcp.server.get_client", return_value=mock_client):
+        result = list_models()
+
+    data = json.loads(result)
+    assert len(data) == 1
+    assert data[0]["model_id"] == "eleven_multilingual_v2"
+    assert data[0]["name"] == "Multilingual v2"
+    assert data[0]["description"] == "Multi-language model"
+    assert data[0]["can_do_text_to_speech"] is True
+    assert data[0]["can_do_voice_conversion"] is True
