@@ -190,3 +190,29 @@ def test_text_to_dialogue():
         assert inputs[0].voice_id == "alice_id"
         assert inputs[1].text == "Hi Alice!"
         assert inputs[1].voice_id == "bob_id"
+
+
+def test_audio_isolation():
+    from elevenlabs_mcp.server import audio_isolation
+
+    mock_client = MagicMock()
+    mock_client.audio_isolation.convert.return_value = iter([b"clean", b"audio"])
+
+    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as input_f:
+        input_f.write(b"noisy audio data")
+        input_f.flush()
+        input_path = input_f.name
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_file = os.path.join(tmpdir, "isolated.mp3")
+        with patch("elevenlabs_mcp.server.get_client", return_value=mock_client):
+            result = audio_isolation(
+                audio_path=input_path,
+                output_path=output_file,
+            )
+
+        assert result == str(Path(output_file).resolve())
+        assert Path(output_file).read_bytes() == b"cleanaudio"
+        mock_client.audio_isolation.convert.assert_called_once()
+
+    os.unlink(input_path)

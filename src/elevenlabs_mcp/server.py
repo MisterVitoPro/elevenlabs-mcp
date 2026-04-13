@@ -213,5 +213,25 @@ def text_to_dialogue(
     return str(path.resolve())
 
 
+@mcp.tool
+def audio_isolation(
+    audio_path: str,
+    output_path: str | None = None,
+) -> str:
+    """Remove background noise from an audio file, isolating the voice.
+
+    Args:
+        audio_path: Path to the input audio file.
+        output_path: Optional file path to save audio. Defaults to auto-generated path.
+    """
+    input_path = validate_audio_path(audio_path)
+    client = get_client()
+    with open(input_path, "rb") as f:
+        audio = client.audio_isolation.convert(audio=f)
+    path = resolve_output_path(output_path, "isolated", "isolation")
+    save_audio(audio, path)
+    return str(path.resolve())
+
+
 def main():
     mcp.run()
