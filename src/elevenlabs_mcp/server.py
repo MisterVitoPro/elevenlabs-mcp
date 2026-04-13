@@ -1,3 +1,4 @@
+import json
 import os
 from datetime import datetime
 from pathlib import Path
@@ -113,6 +114,27 @@ def sound_effect(
     path = resolve_output_path(output_path, "sfx", "sfx")
     save_audio(audio, path)
     return str(path.resolve())
+
+
+@mcp.tool
+def list_voices() -> str:
+    """List all available ElevenLabs voices.
+
+    Returns a JSON array of voices with their ID, name, category, description, and labels.
+    """
+    client = get_client()
+    response = client.voices.get_all()
+    voices = [
+        {
+            "voice_id": v.voice_id,
+            "name": v.name,
+            "category": v.category,
+            "description": v.description,
+            "labels": v.labels,
+        }
+        for v in response.voices
+    ]
+    return json.dumps(voices, indent=2)
 
 
 def main():

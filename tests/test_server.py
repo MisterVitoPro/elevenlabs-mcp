@@ -1,6 +1,7 @@
+import json
 import os
 import tempfile
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from pathlib import Path
 
 
@@ -70,3 +71,27 @@ def test_validate_audio_path_missing_file():
     from elevenlabs_mcp.server import validate_audio_path
     with pytest.raises(ValueError, match="Audio file not found"):
         validate_audio_path("/nonexistent/audio.mp3")
+
+
+def test_list_voices():
+    from elevenlabs_mcp.server import list_voices
+
+    mock_client = MagicMock()
+    mock_voice = MagicMock()
+    mock_voice.voice_id = "abc123"
+    mock_voice.name = "George"
+    mock_voice.category = "premade"
+    mock_voice.description = "A deep voice"
+    mock_voice.labels = {"accent": "british"}
+    mock_client.voices.get_all.return_value = MagicMock(voices=[mock_voice])
+
+    with patch("elevenlabs_mcp.server.get_client", return_value=mock_client):
+        result = list_voices()
+
+    data = json.loads(result)
+    assert len(data) == 1
+    assert data[0]["voice_id"] == "abc123"
+    assert data[0]["name"] == "George"
+    assert data[0]["category"] == "premade"
+    assert data[0]["description"] == "A deep voice"
+    assert data[0]["labels"] == {"accent": "british"}
