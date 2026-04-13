@@ -1,7 +1,7 @@
 [project]
 name = "elevenlabs-mcp"
 version = "0.1.0"
-description = "MCP server for ElevenLabs text-to-speech and sound effects"
+description = "MCP server for ElevenLabs text-to-speech, voice conversion, transcription, and audio tools"
 requires-python = ">=3.10"
 dependencies = [
     "mcp[cli]>=1.2.0",
