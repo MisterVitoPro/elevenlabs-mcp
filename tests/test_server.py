@@ -95,3 +95,33 @@ def test_list_voices():
     assert data[0]["category"] == "premade"
     assert data[0]["description"] == "A deep voice"
     assert data[0]["labels"] == {"accent": "british"}
+
+
+def test_get_voice():
+    from elevenlabs_mcp.server import get_voice
+
+    mock_client = MagicMock()
+    mock_voice_list = MagicMock()
+    mock_voice_entry = MagicMock()
+    mock_voice_entry.voice_id = "abc123"
+    mock_voice_entry.name = "George"
+    mock_voice_list.voices = [mock_voice_entry]
+    mock_client.voices.get_all.return_value = mock_voice_list
+
+    mock_voice_detail = MagicMock()
+    mock_voice_detail.voice_id = "abc123"
+    mock_voice_detail.name = "George"
+    mock_voice_detail.category = "premade"
+    mock_voice_detail.description = "A deep voice"
+    mock_voice_detail.labels = {"accent": "british"}
+    mock_voice_detail.settings = None
+    mock_voice_detail.preview_url = "https://example.com/preview.mp3"
+    mock_client.voices.get.return_value = mock_voice_detail
+
+    with patch("elevenlabs_mcp.server.get_client", return_value=mock_client):
+        result = get_voice(voice="George")
+
+    data = json.loads(result)
+    assert data["voice_id"] == "abc123"
+    assert data["name"] == "George"
+    assert data["preview_url"] == "https://example.com/preview.mp3"

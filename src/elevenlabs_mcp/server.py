@@ -137,5 +137,29 @@ def list_voices() -> str:
     return json.dumps(voices, indent=2)
 
 
+@mcp.tool
+def get_voice(voice: str) -> str:
+    """Get details for a specific ElevenLabs voice.
+
+    Args:
+        voice: Voice name or ID.
+
+    Returns JSON with voice details including settings and preview URL.
+    """
+    client = get_client()
+    voice_id = resolve_voice_id(client, voice)
+    v = client.voices.get(voice_id)
+    data = {
+        "voice_id": v.voice_id,
+        "name": v.name,
+        "category": v.category,
+        "description": v.description,
+        "labels": v.labels,
+        "settings": v.settings,
+        "preview_url": v.preview_url,
+    }
+    return json.dumps(data, indent=2, default=str)
+
+
 def main():
     mcp.run()
