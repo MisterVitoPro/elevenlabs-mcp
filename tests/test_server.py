@@ -263,3 +263,27 @@ def test_list_models():
     assert data[0]["description"] == "Multi-language model"
     assert data[0]["can_do_text_to_speech"] is True
     assert data[0]["can_do_voice_conversion"] is True
+
+
+def test_get_usage():
+    from elevenlabs_mcp.server import get_usage
+
+    mock_client = MagicMock()
+    mock_subscription = MagicMock()
+    mock_subscription.tier = "starter"
+    mock_subscription.character_count = 5000
+    mock_subscription.character_limit = 30000
+    mock_subscription.next_character_count_reset_unix = 1700000000
+    mock_user = MagicMock()
+    mock_user.subscription = mock_subscription
+    mock_client.user.get.return_value = mock_user
+
+    with patch("elevenlabs_mcp.server.get_client", return_value=mock_client):
+        result = get_usage()
+
+    data = json.loads(result)
+    assert data["tier"] == "starter"
+    assert data["character_count"] == 5000
+    assert data["character_limit"] == 30000
+    assert data["characters_remaining"] == 25000
+    assert data["next_reset_unix"] == 1700000000
