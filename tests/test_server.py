@@ -125,3 +125,32 @@ def test_get_voice():
     assert data["voice_id"] == "abc123"
     assert data["name"] == "George"
     assert data["preview_url"] == "https://example.com/preview.mp3"
+
+
+def test_speech_to_speech():
+    from elevenlabs_mcp.server import speech_to_speech
+
+    mock_client = MagicMock()
+    mock_voice_entry = MagicMock()
+    mock_voice_entry.voice_id = "abc123"
+    mock_voice_entry.name = "George"
+    mock_client.voices.get_all.return_value = MagicMock(voices=[mock_voice_entry])
+    mock_client.speech_to_speech.convert.return_value = iter([b"converted", b"audio"])
+
+    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as input_f:
+        input_f.write(b"fake input audio")
+        input_f.flush()
+        input_path = input_f.name
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_file = os.path.join(tmpdir, "output.mp3")
+        with patch("elevenlabs_mcp.server.get_client", return_value=mock_client):
+            result = speech_to_speech(
+                audio_path=input_path,
+                voice="George",
+                output_path=output_file,
+            )
+        assert result == str(Path(output_file).resolve())
+        assert Path(output_file).read_bytes() == b"convertedaudio"
+        mock_client.speech_to_speech.convert.assert_called_once()
+    os.unlink(input_path)

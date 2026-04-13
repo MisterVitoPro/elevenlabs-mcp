@@ -161,5 +161,34 @@ def get_voice(voice: str) -> str:
     return json.dumps(data, indent=2, default=str)
 
 
+@mcp.tool
+def speech_to_speech(
+    audio_path: str,
+    voice: str = "George",
+    model: str = "eleven_english_sts_v2",
+    output_path: str | None = None,
+) -> str:
+    """Convert speech in an audio file to a different voice.
+
+    Args:
+        audio_path: Path to the input audio file.
+        voice: Target voice name or ID. Defaults to "George".
+        model: Model ID. Defaults to "eleven_english_sts_v2".
+        output_path: Optional file path to save audio. Defaults to auto-generated path.
+    """
+    input_path = validate_audio_path(audio_path)
+    client = get_client()
+    voice_id = resolve_voice_id(client, voice)
+    with open(input_path, "rb") as f:
+        audio = client.speech_to_speech.convert(
+            voice_id=voice_id,
+            audio=f,
+            model_id=model,
+        )
+    path = resolve_output_path(output_path, voice, "sts")
+    save_audio(audio, path)
+    return str(path.resolve())
+
+
 def main():
     mcp.run()
