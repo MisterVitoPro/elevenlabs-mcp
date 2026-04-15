@@ -66,7 +66,7 @@ Add to your MCP settings (`~/.claude/settings.json` or project `.mcp.json`):
   "mcpServers": {
     "elevenlabs": {
       "command": "uv",
-      "args": ["run", "--directory", "/path/to/elevenlabs-mcp", "elevenlabs-mcp"],
+      "args": ["run", "--directory", "/path/to/elevenlabs-mcp", "python", "-m", "elevenlabs_mcp.server"],
       "env": {
         "ELEVENLABS_API_KEY": "your-key-here"
       }
@@ -84,7 +84,7 @@ Add to your Claude Desktop config (`claude_desktop_config.json`):
   "mcpServers": {
     "elevenlabs": {
       "command": "uv",
-      "args": ["run", "--directory", "/path/to/elevenlabs-mcp", "elevenlabs-mcp"],
+      "args": ["run", "--directory", "/path/to/elevenlabs-mcp", "python", "-m", "elevenlabs_mcp.server"],
       "env": {
         "ELEVENLABS_API_KEY": "your-key-here"
       }

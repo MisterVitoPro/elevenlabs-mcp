@@ -459,3 +459,7 @@ def main():
             "Set it before starting the server."
         )
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()
