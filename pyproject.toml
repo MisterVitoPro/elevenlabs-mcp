@@ -1,6 +1,6 @@
 [project]
 name = "elevenlabs-mcp"
-version = "1.1.1"
+version = "1.2.0"
 description = "MCP server for ElevenLabs text-to-speech, voice conversion, transcription, and audio tools"
 readme = "README.md"
 license = "MIT"
