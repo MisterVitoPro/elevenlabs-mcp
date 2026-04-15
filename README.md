@@ -23,6 +23,18 @@ An [MCP](https://modelcontextprotocol.io/) server that provides AI assistants wi
 
 ## Installation
 
+This project uses [`uv`](https://docs.astral.sh/uv/) for dependency management. Install it first if you don't have it:
+
+```bash
+# macOS / Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+Then clone and sync the project:
+
 ```bash
 git clone https://github.com/MisterVitoPro/elevenlabs-mcp.git
 cd elevenlabs-mcp
