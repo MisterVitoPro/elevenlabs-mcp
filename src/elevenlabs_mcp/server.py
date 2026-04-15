@@ -180,14 +180,14 @@ def speech_to_speech(
     input_path = validate_audio_path(audio_path)
     client = get_client()
     voice_id = resolve_voice_id(client, voice)
+    path = resolve_output_path(output_path, voice, "sts")
     with open(input_path, "rb") as f:
         audio = client.speech_to_speech.convert(
             voice_id=voice_id,
             audio=f,
             model_id=model,
         )
-    path = resolve_output_path(output_path, voice, "sts")
-    save_audio(audio, path)
+        save_audio(audio, path)
     return str(path.resolve())
 
 
@@ -226,10 +226,10 @@ def audio_isolation(
     """
     input_path = validate_audio_path(audio_path)
     client = get_client()
+    path = resolve_output_path(output_path, "isolated", "isolation")
     with open(input_path, "rb") as f:
         audio = client.audio_isolation.convert(audio=f)
-    path = resolve_output_path(output_path, "isolated", "isolation")
-    save_audio(audio, path)
+        save_audio(audio, path)
     return str(path.resolve())
 
 

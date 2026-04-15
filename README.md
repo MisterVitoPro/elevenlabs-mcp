@@ -1,6 +1,6 @@
 # ElevenLabs MCP Server
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.0.1-blue)
 
 An [MCP](https://modelcontextprotocol.io/) server that provides AI assistants with access to [ElevenLabs](https://elevenlabs.io/) audio capabilities -- text-to-speech, voice conversion, sound effects, transcription, and more.
 
