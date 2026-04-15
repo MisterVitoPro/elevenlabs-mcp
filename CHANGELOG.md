@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-04-15
+
+### Fixed
+
+- Add `if __name__ == "__main__": main()` guard to `server.py` so the server starts correctly when invoked via `python -m elevenlabs_mcp.server`
+- Update MCP config examples in README to use `python -m` invocation, avoiding Windows file-lock errors on the `elevenlabs-mcp.exe` entry point script
+
 ## [1.0.0] - 2026-04-12
 
 ### Added
