@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `compose_music` tool -- generate a music track from a text prompt, with optional length, instrumental-only mode, and output format
+- Optional `ELEVENLABS_API_KEY_ID` environment variable to record which API key a config uses. Informational only, never used to authenticate; `get_usage` echoes it as `api_key_id`
+- Document every environment variable in the README, including a warning that the API key must be the `sk_` secret and not the key ID shown in the dashboard
 
 ### Changed
 

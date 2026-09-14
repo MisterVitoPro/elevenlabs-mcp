@@ -478,7 +478,9 @@ def list_models() -> str:
 def get_usage() -> str:
     """Get current ElevenLabs API usage and quota information.
 
-    Returns JSON with character usage, limits, and reset time.
+    Returns JSON with character usage, limits, and reset time. Includes
+    "api_key_id" when ELEVENLABS_API_KEY_ID is set, to identify which key
+    the server is configured with.
     """
     client = get_client()
     user = client.user.get()
@@ -495,6 +497,9 @@ def get_usage() -> str:
         "characters_remaining": remaining,
         "next_reset_unix": sub.next_character_count_reset_unix,
     }
+    key_id = os.environ.get("ELEVENLABS_API_KEY_ID")
+    if key_id:
+        data["api_key_id"] = key_id
     return json.dumps(data, indent=2)
 
 

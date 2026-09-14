@@ -47,14 +47,35 @@ uv sync
 Set your ElevenLabs API key:
 
 ```bash
-export ELEVENLABS_API_KEY=your-key-here
+export ELEVENLABS_API_KEY=sk_your-key-here
 ```
+
+> **Use the secret key, not the key ID.** The [API keys dashboard](https://elevenlabs.io/app/settings/api-keys)
+> lists keys by ID. The secret key starts with `sk_` and is shown only once, when the
+> key is created or rotated. Passing the ID fails every request with
+> `API key ID used as API key`.
 
 Optionally set a custom output directory (defaults to `~/elevenlabs-output/`):
 
 ```bash
 export ELEVENLABS_OUTPUT_DIR=/path/to/output
 ```
+
+### Environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ELEVENLABS_API_KEY` | *required* | Secret API key, starting with `sk_` |
+| `ELEVENLABS_API_KEY_ID` | unset | ID of the key above, for your own reference. Never used to authenticate; echoed by `get_usage` as `api_key_id` |
+| `ELEVENLABS_OUTPUT_DIR` | `~/elevenlabs-output` | Where generated audio is written. Tools refuse to write outside it |
+| `ELEVENLABS_INPUT_DIR` | `~/elevenlabs-input` | Where tools read source audio from. Tools refuse to read outside it |
+| `ELEVENLABS_TIMEOUT` | `120` | HTTP timeout in seconds |
+| `MAX_TTS_CHARS` | `5000` | Client-side cap on `text_to_speech` input length |
+| `ELEVENLABS_MODEL_ALLOWLIST` | unset | Comma-separated model IDs; requests for anything else are rejected |
+
+Since the dashboard identifies keys by ID rather than name, recording
+`ELEVENLABS_API_KEY_ID` alongside the key makes it easy to tell later which key a
+given config is using. See `.env.example`.
 
 ## MCP Integration
 

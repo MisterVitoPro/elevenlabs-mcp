@@ -745,3 +745,54 @@ def test_compose_music_default_filename_uses_format_extension():
 
     assert result.endswith(".opus")
     assert "music" in Path(result).name
+
+
+# ELEVENLABS_API_KEY_ID: informational key identifier
+
+def _usage_mock_client():
+    mock_client = MagicMock()
+    mock_sub = MagicMock()
+    mock_sub.tier = "starter"
+    mock_sub.character_count = 5000
+    mock_sub.character_limit = 30000
+    mock_sub.next_character_count_reset_unix = 1700000000
+    mock_user = MagicMock()
+    mock_user.subscription = mock_sub
+    mock_client.user.get.return_value = mock_user
+    return mock_client
+
+
+def test_get_usage_includes_api_key_id_when_set():
+    from elevenlabs_mcp.server import get_usage
+
+    with patch.dict(os.environ, {"ELEVENLABS_API_KEY_ID": "9de94c1a2fb4cbb1"}):
+        with patch("elevenlabs_mcp.server.get_client", return_value=_usage_mock_client()):
+            data = json.loads(get_usage())
+
+    assert data["api_key_id"] == "9de94c1a2fb4cbb1"
+
+
+def test_get_usage_omits_api_key_id_when_unset():
+    from elevenlabs_mcp.server import get_usage
+
+    env = os.environ.copy()
+    env.pop("ELEVENLABS_API_KEY_ID", None)
+    with patch.dict(os.environ, env, clear=True):
+        with patch("elevenlabs_mcp.server.get_client", return_value=_usage_mock_client()):
+            data = json.loads(get_usage())
+
+    assert "api_key_id" not in data
+
+
+def test_get_usage_key_id_does_not_reach_the_client():
+    # The ID is informational only: it must never be used to authenticate.
+    from elevenlabs_mcp.server import get_client
+
+    with patch.dict(os.environ, {
+        "ELEVENLABS_API_KEY": "sk_real_key",
+        "ELEVENLABS_API_KEY_ID": "9de94c1a2fb4cbb1",
+    }):
+        with patch("elevenlabs_mcp.server.ElevenLabs") as mock_cls:
+            get_client()
+
+    assert mock_cls.call_args.kwargs["api_key"] == "sk_real_key"
