@@ -8,6 +8,7 @@ An [MCP](https://modelcontextprotocol.io/) server that provides AI assistants wi
 
 - **Text-to-Speech** -- Convert text to natural-sounding speech with 30+ voices
 - **Sound Effects** -- Generate sound effects from text descriptions
+- **Music Generation** -- Compose full music tracks from a text prompt
 - **Speech-to-Speech** -- Convert speech audio to a different voice
 - **Multi-Speaker Dialogue** -- Generate dialogue with multiple voices from a script
 - **Audio Isolation** -- Remove background noise from audio files
@@ -46,14 +47,35 @@ uv sync
 Set your ElevenLabs API key:
 
 ```bash
-export ELEVENLABS_API_KEY=your-key-here
+export ELEVENLABS_API_KEY=sk_your-key-here
 ```
+
+> **Use the secret key, not the key ID.** The [API keys dashboard](https://elevenlabs.io/app/settings/api-keys)
+> lists keys by ID. The secret key starts with `sk_` and is shown only once, when the
+> key is created or rotated. Passing the ID fails every request with
+> `API key ID used as API key`.
 
 Optionally set a custom output directory (defaults to `~/elevenlabs-output/`):
 
 ```bash
 export ELEVENLABS_OUTPUT_DIR=/path/to/output
 ```
+
+### Environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ELEVENLABS_API_KEY` | *required* | Secret API key, starting with `sk_` |
+| `ELEVENLABS_API_KEY_ID` | unset | ID of the key above, for your own reference. Never used to authenticate; echoed by `get_usage` as `api_key_id` |
+| `ELEVENLABS_OUTPUT_DIR` | `~/elevenlabs-output` | Where generated audio is written. Tools refuse to write outside it |
+| `ELEVENLABS_INPUT_DIR` | `~/elevenlabs-input` | Where tools read source audio from. Tools refuse to read outside it |
+| `ELEVENLABS_TIMEOUT` | `120` | HTTP timeout in seconds |
+| `MAX_TTS_CHARS` | `5000` | Client-side cap on `text_to_speech` input length |
+| `ELEVENLABS_MODEL_ALLOWLIST` | unset | Comma-separated model IDs; requests for anything else are rejected |
+
+Since the dashboard identifies keys by ID rather than name, recording
+`ELEVENLABS_API_KEY_ID` alongside the key makes it easy to tell later which key a
+given config is using. See `.env.example`.
 
 ## MCP Integration
 
@@ -105,7 +127,7 @@ Convert text to speech audio.
 |-----------|------|---------|-------------|
 | `text` | string | *required* | Text to convert |
 | `voice` | string | `"George"` | Voice name or ID |
-| `model` | string | `"eleven_multilingual_v2"` | Model ID |
+| `model` | string | `"eleven_multilingual_v2"` | Model ID (`eleven_v3` for expressiveness, `eleven_flash_v2_5` for low latency) |
 | `output_format` | string | `"mp3_44100_128"` | Audio format |
 | `output_path` | string | auto-generated | File path to save audio |
 
@@ -119,6 +141,19 @@ Generate a sound effect from a text description.
 | `duration` | float | auto | Duration in seconds (0.5--30) |
 | `output_path` | string | auto-generated | File path to save audio |
 
+#### `compose_music`
+
+Generate a music track from a text description.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `prompt` | string | *required* | Description of the music (genre, mood, instrumentation) |
+| `length_seconds` | float | auto | Track length in seconds (3--600) |
+| `model` | string | `"music_v2_5"` | Music model ID |
+| `output_format` | string | `"mp3_44100_128"` | Audio format |
+| `force_instrumental` | bool | `false` | Guarantee the track has no vocals |
+| `output_path` | string | auto-generated | File path to save audio |
+
 #### `speech_to_speech`
 
 Convert speech in an audio file to a different voice.
@@ -127,7 +162,7 @@ Convert speech in an audio file to a different voice.
 |-----------|------|---------|-------------|
 | `audio_path` | string | *required* | Path to input audio file |
 | `voice` | string | `"George"` | Target voice name or ID |
-| `model` | string | `"eleven_english_sts_v2"` | Model ID |
+| `model` | string | `"eleven_multilingual_sts_v2"` | Model ID (use `eleven_english_sts_v2` for English-only) |
 | `output_path` | string | auto-generated | File path to save audio |
 
 #### `text_to_dialogue`

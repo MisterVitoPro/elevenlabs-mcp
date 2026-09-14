@@ -4,6 +4,8 @@ __pycache__/
 .pytest_cache/
 .env
 .env.*
+!.env.example
 public/
 docs/
 test_output/
+**/plan-runner/

@@ -18,6 +18,9 @@ _client: "tuple[tuple, ElevenLabs] | None" = None
 _voices_cache: "dict[int, tuple[float, object]]" = {}
 _VOICES_TTL = 300.0
 
+MUSIC_MIN_MS = 3000
+MUSIC_MAX_MS = 600000
+
 
 def get_output_dir() -> Path:
     return Path(os.environ.get("ELEVENLABS_OUTPUT_DIR", str(Path.home() / "elevenlabs-output")))
@@ -168,7 +171,9 @@ def text_to_speech(
     Args:
         text: The text to convert to speech.
         voice: Voice ID or name. Defaults to "George".
-        model: Model ID. Defaults to "eleven_multilingual_v2".
+        model: Model ID. Defaults to "eleven_multilingual_v2", the most stable choice
+            for long-form text. Use "eleven_v3" for the most expressive delivery, or
+            "eleven_flash_v2_5" for the lowest latency.
         output_format: Audio format. Defaults to "mp3_44100_128".
         output_path: Optional file path to save audio. Defaults to auto-generated path.
     """
@@ -210,6 +215,47 @@ def sound_effect(
         kwargs["duration_seconds"] = duration
     audio = client.text_to_sound_effects.convert(**kwargs)
     path = resolve_output_path(output_path, "sfx", "sfx")
+    save_audio(audio, path)
+    return str(path.resolve())
+
+
+@mcp.tool
+def compose_music(
+    prompt: str,
+    length_seconds: float | None = None,
+    model: str = "music_v2_5",
+    output_format: str = "mp3_44100_128",
+    force_instrumental: bool = False,
+    output_path: str | None = None,
+) -> str:
+    """Generate a music track from a text description using ElevenLabs.
+
+    Args:
+        prompt: Text description of the desired music (genre, mood, instrumentation).
+        length_seconds: Optional track length in seconds (3-600). Chosen by the model if omitted.
+        model: Music model ID. Defaults to "music_v2_5".
+        output_format: Audio format. Defaults to "mp3_44100_128".
+        force_instrumental: If True, guarantee the track has no vocals.
+        output_path: Optional file path to save audio. Defaults to auto-generated path.
+    """
+    _validate_model(model)
+    kwargs: dict = {
+        "prompt": prompt,
+        "model_id": model,
+        "output_format": output_format,
+        "force_instrumental": force_instrumental,
+    }
+    if length_seconds is not None:
+        length_ms = round(length_seconds * 1000)
+        if not MUSIC_MIN_MS <= length_ms <= MUSIC_MAX_MS:
+            raise ValueError(
+                f"length_seconds must be between {MUSIC_MIN_MS / 1000} and "
+                f"{MUSIC_MAX_MS / 1000} seconds, got {length_seconds}."
+            )
+        kwargs["music_length_ms"] = length_ms
+    client = get_client()
+    audio = client.music.compose(**kwargs)
+    path = resolve_output_path(output_path, "music", "music", output_format)
     save_audio(audio, path)
     return str(path.resolve())
 
@@ -263,7 +309,7 @@ def get_voice(voice: str) -> str:
 def speech_to_speech(
     audio_path: str,
     voice: str = "George",
-    model: str = "eleven_english_sts_v2",
+    model: str = "eleven_multilingual_sts_v2",
     output_path: str | None = None,
 ) -> str:
     """Convert speech in an audio file to a different voice.
@@ -271,7 +317,8 @@ def speech_to_speech(
     Args:
         audio_path: Path to the input audio file.
         voice: Target voice name or ID. Defaults to "George".
-        model: Model ID. Defaults to "eleven_english_sts_v2".
+        model: Model ID. Defaults to "eleven_multilingual_sts_v2".
+            Use "eleven_english_sts_v2" for English-only conversion.
         output_path: Optional file path to save audio. Defaults to auto-generated path.
     """
     _validate_model(model)
@@ -431,7 +478,9 @@ def list_models() -> str:
 def get_usage() -> str:
     """Get current ElevenLabs API usage and quota information.
 
-    Returns JSON with character usage, limits, and reset time.
+    Returns JSON with character usage, limits, and reset time. Includes
+    "api_key_id" when ELEVENLABS_API_KEY_ID is set, to identify which key
+    the server is configured with.
     """
     client = get_client()
     user = client.user.get()
@@ -448,6 +497,9 @@ def get_usage() -> str:
         "characters_remaining": remaining,
         "next_reset_unix": sub.next_character_count_reset_unix,
     }
+    key_id = os.environ.get("ELEVENLABS_API_KEY_ID")
+    if key_id:
+        data["api_key_id"] = key_id
     return json.dumps(data, indent=2)
 
 
