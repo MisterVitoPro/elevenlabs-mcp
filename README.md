@@ -8,6 +8,7 @@ An [MCP](https://modelcontextprotocol.io/) server that provides AI assistants wi
 
 - **Text-to-Speech** -- Convert text to natural-sounding speech with 30+ voices
 - **Sound Effects** -- Generate sound effects from text descriptions
+- **Music Generation** -- Compose full music tracks from a text prompt
 - **Speech-to-Speech** -- Convert speech audio to a different voice
 - **Multi-Speaker Dialogue** -- Generate dialogue with multiple voices from a script
 - **Audio Isolation** -- Remove background noise from audio files
@@ -105,7 +106,7 @@ Convert text to speech audio.
 |-----------|------|---------|-------------|
 | `text` | string | *required* | Text to convert |
 | `voice` | string | `"George"` | Voice name or ID |
-| `model` | string | `"eleven_multilingual_v2"` | Model ID |
+| `model` | string | `"eleven_multilingual_v2"` | Model ID (`eleven_v3` for expressiveness, `eleven_flash_v2_5` for low latency) |
 | `output_format` | string | `"mp3_44100_128"` | Audio format |
 | `output_path` | string | auto-generated | File path to save audio |
 
@@ -119,6 +120,19 @@ Generate a sound effect from a text description.
 | `duration` | float | auto | Duration in seconds (0.5--30) |
 | `output_path` | string | auto-generated | File path to save audio |
 
+#### `compose_music`
+
+Generate a music track from a text description.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `prompt` | string | *required* | Description of the music (genre, mood, instrumentation) |
+| `length_seconds` | float | auto | Track length in seconds (3--600) |
+| `model` | string | `"music_v2_5"` | Music model ID |
+| `output_format` | string | `"mp3_44100_128"` | Audio format |
+| `force_instrumental` | bool | `false` | Guarantee the track has no vocals |
+| `output_path` | string | auto-generated | File path to save audio |
+
 #### `speech_to_speech`
 
 Convert speech in an audio file to a different voice.
@@ -127,7 +141,7 @@ Convert speech in an audio file to a different voice.
 |-----------|------|---------|-------------|
 | `audio_path` | string | *required* | Path to input audio file |
 | `voice` | string | `"George"` | Target voice name or ID |
-| `model` | string | `"eleven_english_sts_v2"` | Model ID |
+| `model` | string | `"eleven_multilingual_sts_v2"` | Model ID (use `eleven_english_sts_v2` for English-only) |
 | `output_path` | string | auto-generated | File path to save audio |
 
 #### `text_to_dialogue`

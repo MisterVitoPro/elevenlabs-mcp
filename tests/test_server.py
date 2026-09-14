@@ -309,6 +309,8 @@ def test_speech_to_speech():
             assert result == str(Path(output_file).resolve())
             assert Path(output_file).read_bytes() == b"convertedaudio"
             mock_client.speech_to_speech.convert.assert_called_once()
+            call_kwargs = mock_client.speech_to_speech.convert.call_args.kwargs
+            assert call_kwargs["model_id"] == "eleven_multilingual_sts_v2"
 
 
 def test_text_to_dialogue():
@@ -647,3 +649,99 @@ def test_text_to_speech_accepts_text_at_max_chars():
             with patch("elevenlabs_mcp.server.get_client", return_value=mock_client):
                 result = text_to_speech(text=exact_text, output_path=output_file)
         assert result is not None
+
+
+# music generation
+
+def test_compose_music_writes_audio_and_returns_path():
+    from elevenlabs_mcp.server import compose_music
+
+    mock_client = MagicMock()
+    mock_client.music.compose.return_value = iter([b"song", b"data"])
+
+    with tempfile.TemporaryDirectory() as output_dir:
+        output_file = os.path.join(output_dir, "track.mp3")
+        with patch.dict(os.environ, {"ELEVENLABS_OUTPUT_DIR": output_dir}):
+            with patch("elevenlabs_mcp.server.get_client", return_value=mock_client):
+                result = compose_music(
+                    prompt="lofi hip hop, rainy night",
+                    output_path=output_file,
+                )
+
+        assert result == str(Path(output_file).resolve())
+        assert Path(output_file).read_bytes() == b"songdata"
+
+    call_kwargs = mock_client.music.compose.call_args.kwargs
+    assert call_kwargs["prompt"] == "lofi hip hop, rainy night"
+    assert call_kwargs["model_id"] == "music_v2_5"
+    assert call_kwargs["force_instrumental"] is False
+    assert "music_length_ms" not in call_kwargs
+
+
+def test_compose_music_converts_length_seconds_to_ms():
+    from elevenlabs_mcp.server import compose_music
+
+    mock_client = MagicMock()
+    mock_client.music.compose.return_value = iter([b"song"])
+
+    with tempfile.TemporaryDirectory() as output_dir:
+        with patch.dict(os.environ, {"ELEVENLABS_OUTPUT_DIR": output_dir}):
+            with patch("elevenlabs_mcp.server.get_client", return_value=mock_client):
+                compose_music(prompt="ambient drone", length_seconds=30.5)
+
+    assert mock_client.music.compose.call_args.kwargs["music_length_ms"] == 30500
+
+
+def test_compose_music_rejects_length_below_minimum():
+    from elevenlabs_mcp.server import compose_music
+
+    mock_client = MagicMock()
+    with patch("elevenlabs_mcp.server.get_client", return_value=mock_client):
+        try:
+            compose_music(prompt="too short", length_seconds=1)
+            assert False, "expected ValueError"
+        except ValueError as e:
+            assert "between" in str(e)
+    mock_client.music.compose.assert_not_called()
+
+
+def test_compose_music_rejects_length_above_maximum():
+    from elevenlabs_mcp.server import compose_music
+
+    mock_client = MagicMock()
+    with patch("elevenlabs_mcp.server.get_client", return_value=mock_client):
+        try:
+            compose_music(prompt="too long", length_seconds=601)
+            assert False, "expected ValueError"
+        except ValueError as e:
+            assert "between" in str(e)
+    mock_client.music.compose.assert_not_called()
+
+
+def test_compose_music_respects_model_allowlist():
+    from elevenlabs_mcp.server import compose_music
+
+    mock_client = MagicMock()
+    with patch.dict(os.environ, {"ELEVENLABS_MODEL_ALLOWLIST": "music_v1"}):
+        with patch("elevenlabs_mcp.server.get_client", return_value=mock_client):
+            try:
+                compose_music(prompt="jazz", model="music_v2_5")
+                assert False, "expected ValueError"
+            except ValueError as e:
+                assert "allowlist" in str(e)
+    mock_client.music.compose.assert_not_called()
+
+
+def test_compose_music_default_filename_uses_format_extension():
+    from elevenlabs_mcp.server import compose_music
+
+    mock_client = MagicMock()
+    mock_client.music.compose.return_value = iter([b"song"])
+
+    with tempfile.TemporaryDirectory() as output_dir:
+        with patch.dict(os.environ, {"ELEVENLABS_OUTPUT_DIR": output_dir}):
+            with patch("elevenlabs_mcp.server.get_client", return_value=mock_client):
+                result = compose_music(prompt="synthwave", output_format="opus_48000_64")
+
+    assert result.endswith(".opus")
+    assert "music" in Path(result).name
