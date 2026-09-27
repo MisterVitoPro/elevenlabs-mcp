@@ -19,7 +19,7 @@ classifiers = [
 ]
 dependencies = [
     "elevenlabs>=2.0.0,<3.0.0",
-    "fastmcp>=3.2.3,<4.0.0",
+    "fastmcp>=4.0.9,<5.0.0",
 ]
 
 [project.urls]
