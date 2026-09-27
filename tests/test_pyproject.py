@@ -33,4 +33,4 @@ def test_fastmcp_dep_has_upper_bound():
     # P1-009: fastmcp dep must pin an upper bound to avoid breaking major-version upgrades
     spec = next((d for d in _get_deps() if d.startswith("fastmcp")), None)
     assert spec is not None
-    assert "<4" in spec, f"fastmcp must have upper bound <4.0.0, got: {spec}"
+    assert "<5" in spec, f"fastmcp must have upper bound <5.0.0, got: {spec}"

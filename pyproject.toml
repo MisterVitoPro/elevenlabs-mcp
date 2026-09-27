@@ -18,8 +18,8 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-    "elevenlabs>=2.0.0,<3.0.0",
-    "fastmcp>=3.2.3,<4.0.0",
+    "elevenlabs>=2.69.0,<3.0.0",
+    "fastmcp>=4.0.9,<5.0.0",
 ]
 
 [project.urls]
@@ -40,5 +40,5 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "pytest>=8.0.0",
+    "pytest>=9.1.1",
 ]
