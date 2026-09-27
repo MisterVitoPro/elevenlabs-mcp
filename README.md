@@ -1,6 +1,8 @@
 # ElevenLabs MCP Server
 
 ![Version](https://img.shields.io/badge/dynamic/toml?url=https://raw.githubusercontent.com/MisterVitoPro/elevenlabs-mcp/main/pyproject.toml&query=$.project.version&label=version&color=blue)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/MisterVitoPro/elevenlabs-mcp/badge)](https://scorecard.dev/viewer/?uri=github.com/MisterVitoPro/elevenlabs-mcp)
+[![CodeQL](https://github.com/MisterVitoPro/elevenlabs-mcp/actions/workflows/codeql.yml/badge.svg)](https://github.com/MisterVitoPro/elevenlabs-mcp/actions/workflows/codeql.yml)
 
 An [MCP](https://modelcontextprotocol.io/) server that provides AI assistants with access to [ElevenLabs](https://elevenlabs.io/) audio capabilities -- text-to-speech, voice conversion, sound effects, transcription, and more.
 
